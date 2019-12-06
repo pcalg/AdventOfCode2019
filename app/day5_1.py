@@ -12,62 +12,148 @@ from general.general import read_file
 import operator
 
 
-def execute_instruction(pc, state):
-    funcs = {1: operator.add, 2: operator.mul}
+class IntMachine:
+    OP_ADD = 1
+    OP_MUL = 2
+    OP_INPUT = 3
+    OP_OUTPUT = 4
+    OP_HALT = 99
 
-    current_instruction = state[pc]
+    def __init__(self, program_code, input_values):
+        self.pc = 0
 
-    # we are finished when we see instruction 99
-    if current_instruction == 99:
-        return True, -1, -1
+        if len(program_code) > 0:
+            self.memory = {pos: int(ch) for pos, ch in enumerate(program_code.split(','))}
+        else:
+            self.memory = dict()
 
-    fn = funcs[current_instruction]
+        self.output = list()
+        self.input = input_values
+        self.halted = False
+        self.max_steps = 50000
 
-    # get values from memory address
-    input_loc_a = state[pc + 1]
-    input_loc_b = state[pc + 2]
-    output_loc = state[pc + 3]
+    def read_next_input(self):
+        """
+        read in from the input queue.
+        """
+        input_value = self.input[0]
+        self.input = self.input[1:]
 
-    res = fn(state[input_loc_a], state[input_loc_b])
+        return input_value
 
-    # not finished
-    return False, output_loc, res
+    def add_output(self, value):
+        self.output.append(value)
+
+    def halt(self):
+        self.halted = True
+
+    def get_value(self, location, immediate):
+        if immediate == 1:
+            return self.memory[location]
+        else:
+            store_loc = self.memory[location]
+            return self.memory[store_loc]
+
+    def execute_instruction(self):
+        funcs = {IntMachine.OP_ADD: operator.add,
+                 IntMachine.OP_MUL: operator.mul,
+                 IntMachine.OP_INPUT: self.read_next_input,
+                 IntMachine.OP_OUTPUT: self.add_output,
+                 IntMachine.OP_HALT: self.halt}
+
+        # lookup for how many steps to move the pc after an instruction
+        pc_moves = {IntMachine.OP_ADD: 4,
+                    IntMachine.OP_MUL: 4,
+                    IntMachine.OP_INPUT: 2,
+                    IntMachine.OP_OUTPUT: 2,
+                    IntMachine.OP_HALT: 1}
+
+        opcode, (p1, p2, p3) = self.decode_instruction(self.memory[self.pc])
+
+        fn = funcs[opcode]
+
+        if opcode == IntMachine.OP_ADD or opcode == IntMachine.OP_MUL:
+            val1 = self.get_value(self.pc + 1, p1)
+            val2 = self.get_value(self.pc + 2, p2)
+            # check to be on the safe side
+            if p3 == 1:
+                raise ValueError(f"Error at location {self.pc} for instruction {opcode}.")
+
+            res = fn(val1, val2)
+            store_loc = self.memory[self.pc + 3]
+            self.memory[store_loc] = res
+        # input
+        elif opcode == IntMachine.OP_INPUT:
+            if p1 == 1:
+                raise ValueError(f"Error at location {self.pc} for instruction {opcode}.")
+            res = fn()
+            store_loc = self.memory[self.pc + 1]
+            self.memory[store_loc] = res
+        # output
+        elif opcode == IntMachine.OP_OUTPUT:
+            val1 = self.get_value(self.pc + 1, p1)
+            fn(val1)
+        # halt
+        elif opcode == IntMachine.OP_HALT:
+            fn()
+
+        self.pc += pc_moves[opcode]
 
 
-def run_intcode(program_state):
+    def decode_instruction(self, instruction):
+        """
+        ABCDE
+        01002
 
-    pc = 0
+        DE - two-digit opcode,      02 == opcode 2
+        C - mode of 1st parameter,  0 == position mode
+        B - mode of 2nd parameter,  1 == immediate mode
+        A - mode of 3rd parameter,  0 == position mode,
+                                  omitted due to being a leading zero
+        """
 
-    finished, output_loc, res = execute_instruction(pc, program_state)
+        instruction_str = str(instruction)
 
-    while not finished:
-        program_state[output_loc] = res
-        pc += 4
-        finished, output_loc, res = execute_instruction(pc, program_state)
+        # get the instruction (last two chars)
+        opcode = int(instruction_str[-2:])
 
-    return program_state
+        # now get the param modes
+        mode_param_1 = 1 if instruction_str[-3:-2] == '1' else 0
+        mode_param_2 = 1 if instruction_str[-4:-3] == '1' else 0
+        mode_param_3 = 1 if instruction_str[-5:-4] == '1' else 0
+
+        param_modes = mode_param_1, mode_param_2, mode_param_3
+
+        return opcode, param_modes
 
 
-def create_program_state(program_str):
-    return {pos: int(ch) for pos, ch in enumerate(program_str.split(','))}
+    def run(self):
+        """
+        Runs the loaded program
+        """
+        print("Starting.")
+
+        steps = 0
+
+        while not self.halted or steps > self.max_steps:
+            self.execute_instruction()
+
+            steps += 1
+
+        print(f"Ending after steps: {steps}")
 
 
 def main(args):
     print(args.location)
 
-    puzzle_input = read_file(args.location, 'input_day5.txt')[0]
+    program_code = read_file(args.location, 'input_day5.txt')[0]
 
-    program_state = create_program_state(puzzle_input)
+    int_machine = IntMachine(program_code, [1])
+    int_machine.run()
 
-    # adjust to "1202 program alarm" state
-    program_state[1] = 12
-    program_state[2] = 2
+    print(int_machine.output)
 
-    run_intcode(program_state)
-
-    print(program_state[0])
-
-    return program_state
+    return int_machine
 
 
 if __name__ == "__main__":
@@ -78,4 +164,4 @@ if __name__ == "__main__":
                         help="Location puzzles")
     args = parser.parse_args()
 
-    program_state = main(args)
+    int_machine = main(args)
