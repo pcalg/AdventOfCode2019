@@ -44,7 +44,7 @@ class IntMachine:
             self.memory = dict()
 
         self.output = list()
-        self.input = input_values
+        self.input = list(input_values)
         self.halted = False
         self.max_steps = 50000
 
