@@ -12,11 +12,28 @@ from general.general import read_file
 import operator
 
 
+def is_not_zero(value):
+    return value != 0
+
+
+def is_zero(value):
+    return value == 0
+
+def is_less(a, b):
+    return 1 if a < b else 0
+
+def is_equal(a, b):
+    return 1 if a == b else 0
+
 class IntMachine:
     OP_ADD = 1
     OP_MUL = 2
     OP_INPUT = 3
     OP_OUTPUT = 4
+    OP_JMP_TRUE = 5
+    OP_JMP_FALSE = 6
+    OP_LESS = 7
+    OP_EQUAL = 8
     OP_HALT = 99
 
     def __init__(self, program_code, input_values):
@@ -54,11 +71,16 @@ class IntMachine:
             store_loc = self.memory[location]
             return self.memory[store_loc]
 
+
     def execute_instruction(self):
         funcs = {IntMachine.OP_ADD: operator.add,
                  IntMachine.OP_MUL: operator.mul,
                  IntMachine.OP_INPUT: self.read_next_input,
                  IntMachine.OP_OUTPUT: self.add_output,
+                 IntMachine.OP_JMP_TRUE: is_not_zero,
+                 IntMachine.OP_JMP_FALSE: is_zero,
+                 IntMachine.OP_LESS: is_less,
+                 IntMachine.OP_EQUAL: is_equal,
                  IntMachine.OP_HALT: self.halt}
 
         # lookup for how many steps to move the pc after an instruction
@@ -66,13 +88,18 @@ class IntMachine:
                     IntMachine.OP_MUL: 4,
                     IntMachine.OP_INPUT: 2,
                     IntMachine.OP_OUTPUT: 2,
+                    IntMachine.OP_JMP_TRUE: 3,
+                    IntMachine.OP_JMP_FALSE: 3,
+                    IntMachine.OP_LESS: 4,
+                    IntMachine.OP_EQUAL: 4,
                     IntMachine.OP_HALT: 1}
 
         opcode, (p1, p2, p3) = self.decode_instruction(self.memory[self.pc])
 
         fn = funcs[opcode]
+        next_pc = self.pc + pc_moves[opcode]
 
-        if opcode == IntMachine.OP_ADD or opcode == IntMachine.OP_MUL:
+        if opcode in [IntMachine.OP_ADD, IntMachine.OP_MUL, IntMachine.OP_LESS, IntMachine.OP_EQUAL]:
             val1 = self.get_value(self.pc + 1, p1)
             val2 = self.get_value(self.pc + 2, p2)
             # check to be on the safe side
@@ -93,12 +120,22 @@ class IntMachine:
         elif opcode == IntMachine.OP_OUTPUT:
             val1 = self.get_value(self.pc + 1, p1)
             fn(val1)
-        # halt
+        elif opcode in [IntMachine.OP_JMP_FALSE, IntMachine.OP_JMP_TRUE]:
+            val1 = self.get_value(self.pc + 1, p1)
+
+            # check to be on the safe side
+            if p3 == 1:
+                raise ValueError(f"Error at location {self.pc} for instruction {opcode}.")
+
+            res = fn(val1)
+
+            if res:
+                next_pc = self.get_value(self.pc + 2, p2)
+
         elif opcode == IntMachine.OP_HALT:
             fn()
 
-        self.pc += pc_moves[opcode]
-
+        self.pc = next_pc
 
     def decode_instruction(self, instruction):
         """
