@@ -1,7 +1,7 @@
 """
-solution adventofcode day 5.
+solution adventofcode day 5 part 2.
 
-https://adventofcode.com/2019/day/5
+https://adventofcode.com/2019/day/5#part2
 
 author: pca
 """
