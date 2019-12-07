@@ -11,7 +11,6 @@ from pathlib import Path
 from general.general import read_file
 import operator
 
-
 def is_not_zero(value):
     return value != 0
 
@@ -94,7 +93,7 @@ class IntMachine:
                     IntMachine.OP_EQUAL: 4,
                     IntMachine.OP_HALT: 1}
 
-        opcode, (p1, p2, p3) = self.decode_instruction(self.memory[self.pc])
+        opcode, (p1, p2, p3) = IntMachine.decode_instruction(self.memory[self.pc])
 
         fn = funcs[opcode]
         next_pc = self.pc + pc_moves[opcode]
@@ -137,7 +136,8 @@ class IntMachine:
 
         self.pc = next_pc
 
-    def decode_instruction(self, instruction):
+    @staticmethod
+    def decode_instruction(instruction):
         """
         ABCDE
         01002
@@ -185,7 +185,7 @@ def main(args):
 
     program_code = read_file(args.location, 'input_day5.txt')[0]
 
-    int_machine = IntMachine(program_code, [1])
+    int_machine = IntMachine(program_code, [5])
     int_machine.run()
 
     print(int_machine.output)
