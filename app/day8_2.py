@@ -1,5 +1,5 @@
 """
-solution AdventOfCode 2019 day 8 part 1.
+solution AdventOfCode 2019 day 8 part 2.
 
 https://adventofcode.com/2019/day/8
 
