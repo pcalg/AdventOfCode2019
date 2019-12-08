@@ -45,7 +45,6 @@ def collect_image_data(dimensions, layers):
 def show_image(dimensions, img_colors):
     img = Image.new('RGB', dimensions)
     for pos in img_colors:
-        print(pos)
         img.putpixel(pos, img_colors[pos])
     img.show()
 
