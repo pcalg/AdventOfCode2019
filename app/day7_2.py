@@ -9,6 +9,7 @@ author: pca
 import argparse
 from pathlib import Path
 from general.general import read_file
+from general.general import get_location_input_files
 from app.int_machine import IntMachine
 import itertools
 
@@ -43,10 +44,8 @@ def run_all_machines(machines):
         machine_input = machine.read_next_output()
 
 
-def main(args):
-    print(args.location)
-
-    program = read_file(args.location, 'input_day7.txt')[0]
+def main(args=None):
+    program = read_file(get_location_input_files(), 'input_day7.txt')[0]
 
     max_signal = 0
 
@@ -61,11 +60,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='puzzle.')
-    parser.add_argument("--location",
-                        type=Path,
-                        required=True,
-                        help="Location puzzles")
-    args = parser.parse_args()
 
-    main(args)
+    main()
