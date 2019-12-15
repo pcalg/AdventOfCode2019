@@ -12,7 +12,6 @@ from general.general import get_location_input_files
 from app.int_machine import IntMachine
 from collections import defaultdict
 from PIL import Image
-from PIL import ImageFilter
 import pytesseract
 
 # directions in (y, x) coords
@@ -123,7 +122,7 @@ def main(args=None):
     img = create_image(robot.grid)
 
     # Use Tesseract to convert the image to text.
-    print(pytesseract.image_to_string(img))
+    print(f"Text in the image: {pytesseract.image_to_string(img)}")
 
 
 if __name__ == "__main__":
