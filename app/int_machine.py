@@ -86,6 +86,9 @@ class IntMachine:
         self.last_output = output_value
         return output_value
 
+    def add_input(self, value):
+        self.input.append(value)
+
     def add_output(self, value):
         self.output.append(value)
 
