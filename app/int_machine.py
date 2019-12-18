@@ -64,7 +64,8 @@ class IntMachine:
         self.pause_output = False
         self.last_output = None
         self.relative_base = 0
-
+        self.silent = False
+        self.values_read = list()
 
     def read_next_input(self):
         """
@@ -72,6 +73,7 @@ class IntMachine:
         """
         input_value = self.input[0]
         self.input = self.input[1:]
+        self.values_read.append(input_value)
 
         return input_value
 
@@ -216,7 +218,8 @@ class IntMachine:
         """
         Runs the loaded program
         """
-        print("Starting.")
+        if not self.silent:
+            print("Starting.")
 
         steps = 0
 
@@ -229,4 +232,5 @@ class IntMachine:
             if len(self.output) > 0 and self.pause_output:
                 break
 
-        print(f"Ending after steps: {steps}")
+        if not self.silent:
+            print(f"Ending after steps: {steps}")
