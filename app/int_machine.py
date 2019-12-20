@@ -66,13 +66,18 @@ class IntMachine:
         self.relative_base = 0
         self.silent = False
         self.values_read = list()
+        self.input_retriever = None
 
     def read_next_input(self):
         """
         read in from the input queue.
         """
-        input_value = self.input[0]
-        self.input = self.input[1:]
+        if self.input_retriever is not None:
+            input_value = self.input_retriever(self)
+        else:
+            input_value = self.input[0]
+            self.input = self.input[1:]
+
         self.values_read.append(input_value)
 
         return input_value
