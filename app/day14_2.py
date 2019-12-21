@@ -49,10 +49,7 @@ def calculate_reactions(reactions, set_sizes, initial_chemical, initial_amount):
             needed_amount = total_amount - store[reaction_chemical]
 
             if needed_amount > 0:
-
                 order_size = ceil(needed_amount / set_size)
-
-                print(f"bought {order_size} of {reaction_chemical}")
 
                 bought[reaction_chemical] += order_size
 
@@ -62,10 +59,10 @@ def calculate_reactions(reactions, set_sizes, initial_chemical, initial_amount):
                 # we might have something left, so put it in the store
                 store[reaction_chemical] += order_size * set_size - total_amount
             else:
-                print(f"Store has enough {store[reaction_chemical]}, withdrew: {total_amount} ")
                 store[reaction_chemical] -= total_amount
 
-    return bought, store
+    return bought['ORE']
+
 
 def create_reaction_lookups(reaction_codes):
 
@@ -81,15 +78,39 @@ def create_reaction_lookups(reaction_codes):
     return reactions, set_sizes
 
 
+def find_max_fuel(reactions, set_sizes, max_ore_amount):
+    """
+    Using binary search to find the right answer.
+    """
+
+    mn_fuel = 0
+    # as convenience set the mx_fuel on ore_amount (this will be too high normally)
+    mx_fuel = max_ore_amount
+
+    while mx_fuel - mn_fuel > 1:
+        md_fuel = (mn_fuel + mx_fuel) // 2
+        ore_amount = calculate_reactions(reactions, set_sizes, 'FUEL', md_fuel)
+
+        # too high, look to the left en otherwise to the right.
+        if ore_amount > max_ore_amount:
+            mx_fuel = md_fuel
+        else:
+            mn_fuel = md_fuel
+
+    return md_fuel - 1 if ore_amount > max_ore_amount else md_fuel
+
+
 def main(args=None):
 
     reaction_codes = read_file(get_location_input_files(), 'input_day14.txt')
     reactions, set_sizes = create_reaction_lookups(reaction_codes)
 
-    bought, store = calculate_reactions(reactions, set_sizes, 'FUEL', 1)
-    print(bought)
-    print(store)
-    print(f"ORE needed {bought['ORE']}")
+    ores_needed = calculate_reactions(reactions, set_sizes, 'FUEL', 1)
+    print(f"ORE needed {ores_needed}")
+
+    max_ores = 1000000000000
+    max_fuel = find_max_fuel(reactions, set_sizes, max_ores)
+    print(f"Max fuel for {max_ores} amount is: {max_fuel}")
 
 
 if __name__ == "__main__":
