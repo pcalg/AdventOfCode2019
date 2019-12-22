@@ -1,5 +1,5 @@
 """
-solution AdventOfCode 2019 day 14 part 1.
+Solution AdventOfCode 2019 day 14 part 2.
 
 https://adventofcode.com/2019/day/14.
 
