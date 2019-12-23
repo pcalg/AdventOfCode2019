@@ -1,5 +1,5 @@
 """
-solution AdventOfCode 2019 day 15 part 1.
+solution AdventOfCode 2019 day 15 part 2.
 
 https://adventofcode.com/2019/day/15.
 
@@ -77,7 +77,7 @@ def find_oxygen(m_initial):
 
     distances = {(0, 0): 0}
 
-    oxygen_distance = 0
+    oxygen_location = (0, 0)
 
     # Use BFS to find the route
     while len(queue) > 0:
@@ -110,9 +110,42 @@ def find_oxygen(m_initial):
                 distances[new_pos] = d + 1
 
             if status == StatusCodes.OXYGEN.value:
-                oxygen_distance = d + 1
+                oxygen_location = new_pos
 
-    return oxygen_distance, tmp_m, grid
+    return oxygen_location, tmp_m, grid
+
+
+def oxygen_fill(grid, oxygen_location):
+    """
+    Use BFS to find the location of the Oxygen. This by cloning the IntMachine for each direction.
+    """
+
+    queue = [(0, oxygen_location)]
+    visited = {oxygen_location}
+
+    # Use BFS to find the route
+    while len(queue) > 0:
+        d, pos = queue.pop(0)
+
+        y, x = pos
+
+        # try out each direction and run the machine there
+        for direction in Directions:
+            dy, dx = deltas[direction]
+            new_pos = y + dy, x + dx
+
+            # no use to try if we already have been here
+            if new_pos not in visited:
+                visited.add(new_pos)
+            else:
+                continue
+
+            status = grid[new_pos]
+
+            if status in [StatusCodes.OXYGEN, StatusCodes.OPEN]:
+                queue.append((d + 1, new_pos))
+
+    return d
 
 
 def main(args=None):
@@ -123,11 +156,13 @@ def main(args=None):
     m.pause_output = True
     m.silent = True
 
-    oxygen_distance, tmp_m, grid = find_oxygen(m)
+    oxygen_location, tmp_m, grid = find_oxygen(m)
 
     draw_grid(grid)
 
-    print(f"Distance: {oxygen_distance}")
+    oxygen_time = oxygen_fill(grid, oxygen_location)
+
+    print(f"Time it takes to fill: {oxygen_time}")
 
 
 if __name__ == "__main__":
