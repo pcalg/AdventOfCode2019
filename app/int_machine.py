@@ -60,7 +60,7 @@ class IntMachine:
         self.output = list()
         self.input = list(input_values)
         self.halted = False
-        self.max_steps = 50000
+        self.max_steps = 100000
         self.pause_output = False
         self.last_output = None
         self.relative_base = 0
