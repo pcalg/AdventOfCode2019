@@ -13,6 +13,7 @@ from general.general import measure
 from app.int_machine import IntMachine
 from collections import defaultdict
 
+
 def print_grid(ascii_output):
     for ch in ascii_output:
         if ch == '\n':
@@ -36,6 +37,7 @@ def to_grid(ascii_output):
 
     return grid
 
+
 def is_intersection(grid, pos):
     y, x = pos
     deltas = [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -45,9 +47,9 @@ def is_intersection(grid, pos):
             return False
     return True
 
+
 @measure
 def solve(grid):
-
     alignment_sum = 0
 
     positions = list(grid.keys())
@@ -60,9 +62,7 @@ def solve(grid):
     return alignment_sum
 
 
-
 def main(args=None):
-
     program_code = read_file(get_location_input_files(), 'input_day17.txt')[0]
 
     m = IntMachine(program_code, [])
@@ -77,6 +77,7 @@ def main(args=None):
     total = solve(g)
 
     print(f"Alignment sum: {total}")
+
 
 if __name__ == "__main__":
     main()
