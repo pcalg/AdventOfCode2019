@@ -10,22 +10,37 @@ def read_file(file_location, file_name):
         content = f.readlines()
     return [c.strip('\n').strip('\t') for c in content]
 
+def get_location(folder):
+
+    p = Path(folder)
+    if p.exists():
+        return p
+
+    p = Path(f'..\\{folder}')
+    if p.exists():
+        return p
+
+    # Didn't find the folder
+    raise ValueError(f"Can't locate the folder: {folder}.")
+
 
 def get_location_input_files():
     """
     Input files are either in '..\\puzzles' or in 'puzzles'.
      This depends  on how the code is run (console or run in pycharm).
     """
-    p = Path('puzzles')
-    if p.exists():
-        return p
+    return get_location('puzzles')
 
-    p = Path('..\\puzzles')
-    if p.exists():
-        return p
-
-    # Didn't find the inputs
-    raise ValueError("Can't locate the input files.")
+    # p = Path('puzzles')
+    # if p.exists():
+    #     return p
+    #
+    # p = Path('..\\puzzles')
+    # if p.exists():
+    #     return p
+    #
+    # # Didn't find the inputs
+    # raise ValueError("Can't locate the input files.")
 
 
 def read_file_int(file_location, file_name):
