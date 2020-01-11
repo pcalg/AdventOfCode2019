@@ -10,6 +10,7 @@ def read_file(file_location, file_name):
         content = f.readlines()
     return [c.strip('\n').strip('\t') for c in content]
 
+
 def get_location(folder):
 
     p = Path(folder)
