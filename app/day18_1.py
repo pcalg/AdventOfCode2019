@@ -74,14 +74,14 @@ def solve(distances, neighbours):
     frontier = list()
     visited = set()
 
-    heapq.heappush(frontier, (0, '@', []))
+    heapq.heappush(frontier, (0, '@', frozenset()))
 
     while len(frontier) > 0:
         d, node, keys = heapq.heappop(frontier)
 
         # Skip if already been in this state
-        if (node, str(keys)) not in visited:
-            visited.add((node, str(keys)))
+        if (node, keys) not in visited:
+            visited.add((node, keys))
 
             if len(keys) == n_keys:
                 print(f"Distance: {d}")
@@ -96,9 +96,9 @@ def solve(distances, neighbours):
                 if can_pas:
                     # Found a new key, then add it to our keys
                     if neighbour.islower() and neighbour not in keys:
-                        neighbour_keys = sorted([key for key in keys] + [neighbour])
+                        neighbour_keys = keys.union([neighbour])
                     else:
-                        neighbour_keys = [key for key in keys]
+                        neighbour_keys = keys
 
                     heapq.heappush(frontier, (d + distances[(node, neighbour)], neighbour, neighbour_keys))
 
