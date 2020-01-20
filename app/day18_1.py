@@ -104,11 +104,7 @@ def solve(distances, neighbours):
 
     return None
 
-
-def main(args=None):
-    grid_txt = read_file(get_location_input_files(), 'input_day18.txt')
-
-    grid2d, nodes = create_grid2d(grid_txt)
+def reachable_graph(grid2d, nodes):
 
     distances = dict()
     neighbours = dict()
@@ -118,6 +114,16 @@ def main(args=None):
         d, node_neighbours = find_distances(grid2d, node, nodes[node])
         distances.update(d)
         neighbours[node] = node_neighbours
+
+    return distances, neighbours
+
+
+def main(args=None):
+    grid_txt = read_file(get_location_input_files(), 'input_day18.txt')
+
+    grid2d, nodes = create_grid2d(grid_txt)
+
+    distances, neighbours = reachable_graph(grid2d, nodes)
 
     dist = solve(distances, neighbours)
 
