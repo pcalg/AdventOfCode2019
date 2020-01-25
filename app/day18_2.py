@@ -1,5 +1,5 @@
 """
-solution AdventOfCode 2019 day 18 part 1.
+solution AdventOfCode 2019 day 18 part 2.
 
 https://adventofcode.com/2019/day/18.
 
@@ -12,15 +12,30 @@ import heapq
 
 
 def create_grid2d(grid_txt):
-    skip_ch = ['#', '.']
+    skip_ch = ['#', '.', '@']
     grid2d = dict()
     nodes = dict()
 
+    start_pos = (0, 0)
+
     for y, line in enumerate(grid_txt):
         for x, ch in enumerate(line):
+            if ch == "@":
+                start_pos = (y, x)
+
             grid2d[(y, x)] = ch
             if ch not in skip_ch:
                 nodes[ch] = (y, x)
+
+    # now add the 4 start positions
+    start_y, start_x = start_pos
+
+    for idx, (dy, dx) in enumerate([(-1, -1), (1, -1), (-1, 1), (1, 1)]):
+        grid2d[(start_y + dy, start_x + dx)] = '@' + str(idx)
+        nodes['@' + str(idx)] = (start_y + dy, start_x + dx)
+
+    for dy, dx in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
+        grid2d[(start_y + dy, start_x + dx)] = '#'
 
     return grid2d, nodes
 
@@ -74,36 +89,34 @@ def solve(distances, neighbours):
     frontier = list()
     visited = set()
 
-    heapq.heappush(frontier, (0, '@', frozenset()))
-
-    cnt = 0
+    heapq.heappush(frontier, (0, frozenset(['@0', '@1', '@2', '@3']), frozenset()))
 
     while len(frontier) > 0:
-        d, node, keys = heapq.heappop(frontier)
-        cnt += 1
+        d, nodes, keys = heapq.heappop(frontier)
 
-        # Skip if already been in this state
-        if (node, keys) not in visited:
-            visited.add((node, keys))
+        if (nodes, keys) not in visited:
+            visited.add((nodes, keys))
 
             if len(keys) == n_keys:
-                print(f"Distance: {d} cnt: {cnt}")
+                print(f"Distance: {d}")
                 return d
 
-            nb_list = neighbours[node]
+            for idx, node in enumerate(nodes):
+                for neighbour in neighbours[node]:
+                    # When at a door, we need a key to go through, otherwise we can always pass.
+                    can_pas = not (neighbour.isupper()) or (neighbour.isupper() and neighbour.lower() in keys)
 
-            for neighbour in nb_list:
-                # When at a door, we need a key to go through, otherwise we can always pass.
-                can_pas = (neighbour.isupper() and neighbour.lower() in keys) or (not neighbour.isupper())
+                    if can_pas:
+                        # Found a new key, then add it to our keys
+                        if neighbour.islower() and neighbour not in keys:
+                            neighbour_keys = keys.union([neighbour])
+                        else:
+                            neighbour_keys = keys
 
-                if can_pas:
-                    # Found a new key, then add it to our keys
-                    if neighbour.islower() and neighbour not in keys:
-                        neighbour_keys = keys.union([neighbour])
-                    else:
-                        neighbour_keys = keys
+                        new_nodes = nodes.difference([node]).union([neighbour])
 
-                    heapq.heappush(frontier, (d + distances[(node, neighbour)], neighbour, neighbour_keys))
+                        if not (new_nodes, neighbour) in visited:
+                            heapq.heappush(frontier, (d + distances[(node, neighbour)], new_nodes, neighbour_keys))
 
     return None
 
@@ -122,6 +135,7 @@ def main(args=None):
         distances.update(d)
         neighbours[node] = node_neighbours
 
+    # TODO: improve running time...
     dist = solve(distances, neighbours)
 
     print(f"Distance: {dist}")
