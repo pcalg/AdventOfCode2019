@@ -58,6 +58,13 @@ def save_output(file_location, file_name, lines):
         f.write('\n'.join(lines) + '\n')
 
 
+def save_grid(fn: Path, ascii_output: str):
+    with open(fn, 'w') as f:
+        for ch in ascii_output:
+            f.write(ch)
+
+
+
 def measure(func):
     @wraps(func)
     def _time_it(*args, **kwargs):
