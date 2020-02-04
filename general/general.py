@@ -32,17 +32,6 @@ def get_location_input_files():
     """
     return get_location('puzzles')
 
-    # p = Path('puzzles')
-    # if p.exists():
-    #     return p
-    #
-    # p = Path('..\\puzzles')
-    # if p.exists():
-    #     return p
-    #
-    # # Didn't find the inputs
-    # raise ValueError("Can't locate the input files.")
-
 
 def read_file_int(file_location, file_name):
     fn = file_location / file_name
@@ -62,7 +51,6 @@ def save_grid(fn: Path, ascii_output: str):
     with open(fn, 'w') as f:
         for ch in ascii_output:
             f.write(ch)
-
 
 
 def measure(func):
