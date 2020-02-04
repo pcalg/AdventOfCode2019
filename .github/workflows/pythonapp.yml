@@ -1,4 +1,4 @@
-name: Python application
+name: Python AdventOfCode 2019 pca
 
 on: [push]
 
